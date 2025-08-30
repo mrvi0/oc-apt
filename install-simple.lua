@@ -131,12 +131,25 @@ local function install_apt()
         filesystem.remove(INSTALL_CONFIG.symlink_path)
     end
     
-    -- Create simple shell script as symlink alternative
-    local link_file = io.open(INSTALL_CONFIG.symlink_path, "w")
-    if link_file then
-        link_file:write("#!/bin/sh\n")
-        link_file:write("lua " .. INSTALL_CONFIG.install_path .. " \"$@\"\n")
-        link_file:close()
+    local ok, err = filesystem.link(INSTALL_CONFIG.install_path, INSTALL_CONFIG.symlink_path)
+    if not ok then
+        print_error("Failed to create symlink: " .. tostring(err or "unknown error"))
+        print_info("Creating shell script wrapper instead...")
+        
+        -- Create simple shell script as symlink alternative
+        local link_file = io.open(INSTALL_CONFIG.symlink_path, "w")
+        if link_file then
+            link_file:write("#!/usr/bin/env lua\n")
+            link_file:write("-- APT wrapper script\n")
+            link_file:write("local args = {...}\n")
+            link_file:write("dofile(\"" .. INSTALL_CONFIG.install_path .. "\")\n")
+            link_file:close()
+            print_success("Wrapper script created")
+        else
+            print_error("Failed to create wrapper script")
+        end
+    else
+        print_success("Symlink created successfully")
     end
     
     print()

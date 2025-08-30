@@ -120,7 +120,7 @@ local function install_apt()
     
     -- Make executable
     print_info("Setting up permissions...")
-    os.execute("chmod +x " .. INSTALL_CONFIG.install_path)
+    -- Note: chmod may not be available in all OpenOS versions
     
     -- Create symlink
     print_info("Creating symlink...")
@@ -128,10 +128,13 @@ local function install_apt()
         filesystem.remove(INSTALL_CONFIG.symlink_path)
     end
     
-    local success = os.execute("ln -s " .. INSTALL_CONFIG.install_path .. " " .. INSTALL_CONFIG.symlink_path)
-    if success ~= 0 then
-        print_error("Failed to create symlink")
+    local ok, err = filesystem.link(INSTALL_CONFIG.install_path, INSTALL_CONFIG.symlink_path)
+    if not ok then
+        print_error("Failed to create symlink: " .. tostring(err or "unknown error"))
         print("You can manually run: ln -s " .. INSTALL_CONFIG.install_path .. " " .. INSTALL_CONFIG.symlink_path)
+        print("Or use: lua " .. INSTALL_CONFIG.install_path .. " <command>")
+    else
+        print_success("Symlink created successfully")
     end
     
     print()

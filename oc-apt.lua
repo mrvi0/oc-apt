@@ -68,6 +68,27 @@ local function ensure_dir(path)
     end
 end
 
+-- Check system requirements
+local function check_requirements()
+    local errors = {}
+    
+    -- Check for internet component
+    if not component.isAvailable("internet") then
+        table.insert(errors, "Internet Card required")
+    end
+    
+    -- Check for essential modules
+    local required_modules = {"json", "filesystem", "computer"}
+    for _, module in ipairs(required_modules) do
+        local ok, _ = pcall(require, module)
+        if not ok then
+            table.insert(errors, "Module '" .. module .. "' not available")
+        end
+    end
+    
+    return #errors == 0, errors
+end
+
 -- Initialize APT directories and files
 local function init_apt()
     ensure_dir(APT_CONFIG.config_dir)
@@ -77,25 +98,46 @@ local function init_apt()
     -- Initialize repos file if it doesn't exist
     if not filesystem.exists(APT_CONFIG.repos_file) then
         local file = io.open(APT_CONFIG.repos_file, "w")
-        for _, repo in ipairs(APT_CONFIG.default_repos) do
-            file:write(repo .. "\n")
+        if file then
+            for _, repo in ipairs(APT_CONFIG.default_repos) do
+                file:write(repo .. "\n")
+            end
+            file:close()
+        else
+            print_error("Cannot create repos file: " .. APT_CONFIG.repos_file)
         end
-        file:close()
     end
     
     -- Initialize installed packages database
     if not filesystem.exists(APT_CONFIG.db_file) then
         local file = io.open(APT_CONFIG.db_file, "w")
-        file:write("{}")
-        file:close()
+        if file then
+            file:write("{}")
+            file:close()
+        else
+            print_error("Cannot create database file: " .. APT_CONFIG.db_file)
+        end
     end
 end
 
 -- HTTP request function
 local function http_request(url)
-    -- Use the internet API (higher level)
-    local inet = require("internet")
-    local handle = inet.request(url)
+    -- Try internet API first, fall back to component API
+    local handle
+    local use_component = false
+    
+    -- Try high-level internet API
+    local success, inet = pcall(require, "internet")
+    if success and inet then
+        handle = inet.request(url)
+    end
+    
+    -- Fall back to component API
+    if not handle and component.isAvailable("internet") then
+        use_component = true
+        handle = internet.request(url)
+    end
+    
     if not handle then
         return nil, "Failed to create HTTP request"
     end
@@ -103,22 +145,42 @@ local function http_request(url)
     local result = ""
     local timeout = computer.uptime() + 30 -- 30 second timeout
     
-    -- Safe iteration with error handling
-    local success, err = pcall(function()
-        for chunk in handle do
-            if chunk then
-                result = result .. chunk
+    if use_component then
+        -- Component API approach
+        while true do
+            local data = handle.read()
+            if data then
+                result = result .. data
+            elseif handle.finishConnect() then
+                break
             end
             
-            -- Check timeout
             if computer.uptime() > timeout then
-                error("Request timeout")
+                handle.close()
+                return nil, "Request timeout"
             end
+            
+            computer.pullSignal(0.05) -- Small delay
         end
-    end)
-    
-    if not success then
-        return nil, err or "Download failed"
+        handle.close()
+    else
+        -- Internet API approach
+        local success, err = pcall(function()
+            for chunk in handle do
+                if chunk then
+                    result = result .. chunk
+                end
+                
+                -- Check timeout
+                if computer.uptime() > timeout then
+                    error("Request timeout")
+                end
+            end
+        end)
+        
+        if not success then
+            return nil, err or "Download failed"
+        end
     end
     
     if result == "" then
@@ -607,6 +669,17 @@ end
 
 -- Main command handler
 local function main(args)
+    -- Check system requirements first
+    local req_ok, req_errors = check_requirements()
+    if not req_ok then
+        print_error("System requirements not met:")
+        for _, err in ipairs(req_errors) do
+            print("  - " .. err)
+        end
+        print("\nPlease install missing components and try again.")
+        return
+    end
+    
     init_apt()
     
     if #args == 0 then
