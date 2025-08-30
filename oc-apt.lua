@@ -249,7 +249,7 @@ local function load_repos()
     local file = io.open(APT_CONFIG.repos_file, "r")
     if file then
         for line in file:lines() do
-            line = line:trim()
+            line = string_trim(line)
             if line ~= "" and not line:match("^#") then
                 table.insert(repos, line)
             end
@@ -307,7 +307,7 @@ local function update_packages()
     end
     
     save_cache(all_packages)
-    print_success("Package lists updated. " .. table.size(all_packages) .. " packages available.")
+    print_success("Package lists updated. " .. table_size(all_packages) .. " packages available.")
 end
 
 -- Search packages
@@ -463,7 +463,7 @@ local function install_package(name, is_dependency)
     installed[name] = {
         version = package.version,
         installed_at = os.time(),
-        files = package.files and table.keys(package.files) or {}
+        files = package.files and table_keys(package.files) or {}
     }
     save_installed(installed)
     
@@ -521,7 +521,7 @@ end
 local function list_installed()
     local installed = load_installed()
     
-    if table.size(installed) == 0 then
+    if table_size(installed) == 0 then
         print_info("No packages installed")
         return
     end
@@ -538,7 +538,7 @@ end
 local function list_available()
     local packages = load_cache()
     
-    if table.size(packages) == 0 then
+    if table_size(packages) == 0 then
         print_info("No packages available. Run 'apt update' first.")
         return
     end
@@ -646,15 +646,14 @@ local function list_repos()
     end
 end
 
--- Utility function for table size
-function table.size(t)
+-- Utility functions
+local function table_size(t)
     local count = 0
     for _ in pairs(t) do count = count + 1 end
     return count
 end
 
--- Utility function for table keys
-function table.keys(t)
+local function table_keys(t)
     local keys = {}
     for k in pairs(t) do
         table.insert(keys, k)
@@ -662,9 +661,8 @@ function table.keys(t)
     return keys
 end
 
--- String trim function
-function string:trim()
-    return self:match("^%s*(.-)%s*$")
+local function string_trim(s)
+    return s:match("^%s*(.-)%s*$")
 end
 
 -- Main command handler
