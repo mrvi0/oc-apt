@@ -306,9 +306,10 @@ The system comes pre-configured with a default repository. You can add additiona
 - Run `apt update` to refresh package lists
 - Check if the package name is correct with `apt search`
 
-**"Failed to download"**
+**"Failed to download"** or **"bad argument #1 (integer expected, got table)"**
 - Check your internet connection
 - Verify the repository URLs are accessible
+- This error was fixed in v1.0.1 - make sure you have the latest version
 
 **"Permission denied"**
 - Ensure you have write access to system directories

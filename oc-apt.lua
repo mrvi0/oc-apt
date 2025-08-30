@@ -24,7 +24,7 @@ local APT_CONFIG = {
     db_file = "/var/lib/oc-apt/installed.json",
     repos_file = "/etc/oc-apt/sources.list",
     default_repos = {
-        "https://raw.githubusercontent.com/oc-apt/packages/main/packages.json"
+        "https://raw.githubusercontent.com/mrvi0/oc-apt/main/example-packages.json"
     }
 }
 
