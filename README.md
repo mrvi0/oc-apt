@@ -50,6 +50,15 @@ wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/install.lua && lua inst
    - Create a symbolic link as `apt`
    - Set up necessary directories
 
+### Method 3: Alternative Installation (If having issues)
+If you encounter HTTP errors with the main installer:
+```bash
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/install-simple.lua
+lua install-simple.lua
+```
+
+This uses direct component API instead of the internet library.
+
 ## 📖 Usage Guide
 
 ### Basic Package Management

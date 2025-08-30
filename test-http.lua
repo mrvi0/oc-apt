@@ -23,7 +23,9 @@ print()
 local function http_request(url)
     print("Requesting: " .. url)
     
-    local handle = internet.request(url)
+    -- Use the internet API (higher level)
+    local inet = require("internet")
+    local handle = inet.request(url)
     if not handle then
         return nil, "Failed to create HTTP request"
     end
@@ -32,19 +34,28 @@ local function http_request(url)
     local timeout = computer.uptime() + 30 -- 30 second timeout
     local bytes_received = 0
     
-    -- Use the iterator approach as documented
-    for chunk in handle do
-        result = result .. chunk
-        bytes_received = bytes_received + #chunk
-        if bytes_received % 4096 == 0 then
-            print("  Downloaded: " .. bytes_received .. " bytes")
+    -- Safe iteration with error handling
+    local success, err = pcall(function()
+        for chunk in handle do
+            if chunk then
+                result = result .. chunk
+                bytes_received = bytes_received + #chunk
+                if bytes_received % 4096 == 0 then
+                    print("  Downloaded: " .. bytes_received .. " bytes")
+                end
+            end
+            
+            -- Check timeout
+            if computer.uptime() > timeout then
+                error("Request timeout")
+            end
         end
-        
-        -- Check timeout
-        if computer.uptime() > timeout then
-            return nil, "Request timeout"
-        end
+    end)
+    
+    if not success then
+        return nil, err or "Download failed"
     end
+    
     print("  Total downloaded: " .. bytes_received .. " bytes")
     return result
 end

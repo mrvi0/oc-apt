@@ -1,14 +1,13 @@
 #!/usr/bin/env lua
 
 --[[
-OC-APT Installation Script
-Downloads and installs the APT package manager for OpenComputers
+Simple OC-APT Installation Script (Fallback Version)
+Uses component API directly if internet API fails
 ]]
 
 local component = require("component")
 local computer = require("computer")
 local filesystem = require("filesystem")
-local internet = require("internet")
 
 -- Configuration
 local INSTALL_CONFIG = {
@@ -51,37 +50,41 @@ local function ensure_dir(path)
     end
 end
 
--- Download file from URL
-local function download_file(url, path)
+-- Download file using component API directly
+local function download_file_simple(url, path)
     print_info("Downloading from: " .. url)
     
-    -- Use the internet API (higher level)
-    local inet = require("internet")
-    local handle = inet.request(url)
+    if not component.isAvailable("internet") then
+        return false, "Internet component not available"
+    end
+    
+    local internet = component.internet
+    local handle = internet.request(url)
     if not handle then
         return false, "Failed to create HTTP request"
     end
     
     local result = ""
-    local timeout = computer.uptime() + 30 -- 30 second timeout
+    local timeout = computer.uptime() + 30
     
-    -- Safe iteration with error handling
-    local success, err = pcall(function()
-        for chunk in handle do
-            if chunk then
-                result = result .. chunk
-            end
-            
-            -- Check timeout
-            if computer.uptime() > timeout then
-                error("Request timeout")
-            end
+    -- Wait for response and read data
+    while true do
+        local data = handle.read()
+        if data then
+            result = result .. data
+        elseif handle.finishConnect() then
+            break -- Connection finished
         end
-    end)
-    
-    if not success then
-        return false, err or "Download failed"
+        
+        if computer.uptime() > timeout then
+            handle.close()
+            return false, "Request timeout"
+        end
+        
+        computer.pullSignal(0.1) -- Small delay
     end
+    
+    handle.close()
     
     if result == "" then
         return false, "Empty response"
@@ -100,7 +103,7 @@ end
 
 -- Main installation function
 local function install_apt()
-    print_colored(COLORS.BLUE, "=== OC-APT Installation ===")
+    print_colored(COLORS.BLUE, "=== Simple OC-APT Installation ===")
     print()
     
     -- Check if internet card is available
@@ -111,8 +114,8 @@ local function install_apt()
     end
     
     -- Download the main APT script
-    print_info("Downloading OC-APT...")
-    local success, err = download_file(INSTALL_CONFIG.apt_url, INSTALL_CONFIG.install_path)
+    print_info("Downloading OC-APT (simple method)...")
+    local success, err = download_file_simple(INSTALL_CONFIG.apt_url, INSTALL_CONFIG.install_path)
     if not success then
         print_error("Failed to download OC-APT: " .. (err or "unknown error"))
         return false
@@ -120,7 +123,7 @@ local function install_apt()
     
     -- Make executable
     print_info("Setting up permissions...")
-    os.execute("chmod +x " .. INSTALL_CONFIG.install_path)
+    -- Note: chmod might not work in all OpenOS versions
     
     -- Create symlink
     print_info("Creating symlink...")
@@ -128,40 +131,24 @@ local function install_apt()
         filesystem.remove(INSTALL_CONFIG.symlink_path)
     end
     
-    local success = os.execute("ln -s " .. INSTALL_CONFIG.install_path .. " " .. INSTALL_CONFIG.symlink_path)
-    if success ~= 0 then
-        print_error("Failed to create symlink")
-        print("You can manually run: ln -s " .. INSTALL_CONFIG.install_path .. " " .. INSTALL_CONFIG.symlink_path)
+    -- Create simple shell script as symlink alternative
+    local link_file = io.open(INSTALL_CONFIG.symlink_path, "w")
+    if link_file then
+        link_file:write("#!/bin/sh\n")
+        link_file:write("lua " .. INSTALL_CONFIG.install_path .. " \"$@\"\n")
+        link_file:close()
     end
     
     print()
     print_success("OC-APT installed successfully!")
     print()
     print_info("You can now use the following commands:")
-    print("  apt update           - Update package lists")
-    print("  apt search <query>   - Search for packages")
-    print("  apt install <name>   - Install a package")
-    print("  apt list             - List available packages")
+    print("  lua " .. INSTALL_CONFIG.install_path .. " update")
+    print("  " .. INSTALL_CONFIG.symlink_path .. " update")
     print()
     print_info("Run 'apt update' to download the latest package lists")
     
     return true
-end
-
--- Check for help argument
-local args = {...}
-if #args > 0 and (args[1] == "-h" or args[1] == "--help" or args[1] == "help") then
-    print("OC-APT Installation Script")
-    print()
-    print("This script downloads and installs the APT package manager")
-    print("for OpenComputers mod (Minecraft 1.7.10)")
-    print()
-    print("Usage: lua install.lua")
-    print()
-    print("Requirements:")
-    print("  - Internet Card in the computer")
-    print("  - Write access to /usr/bin/")
-    return
 end
 
 -- Run installation
@@ -169,5 +156,5 @@ if not install_apt() then
     print()
     print_error("Installation failed!")
     print("Please check the error messages above and try again")
-    os.exit(1)
+    print("Try using the regular install.lua if this doesn't work")
 end 

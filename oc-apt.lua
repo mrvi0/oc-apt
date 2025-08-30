@@ -93,7 +93,9 @@ end
 
 -- HTTP request function
 local function http_request(url)
-    local handle = internet.request(url)
+    -- Use the internet API (higher level)
+    local inet = require("internet")
+    local handle = inet.request(url)
     if not handle then
         return nil, "Failed to create HTTP request"
     end
@@ -101,14 +103,26 @@ local function http_request(url)
     local result = ""
     local timeout = computer.uptime() + 30 -- 30 second timeout
     
-    -- Use the iterator approach as documented
-    for chunk in handle do
-        result = result .. chunk
-        
-        -- Check timeout
-        if computer.uptime() > timeout then
-            return nil, "Request timeout"
+    -- Safe iteration with error handling
+    local success, err = pcall(function()
+        for chunk in handle do
+            if chunk then
+                result = result .. chunk
+            end
+            
+            -- Check timeout
+            if computer.uptime() > timeout then
+                error("Request timeout")
+            end
         end
+    end)
+    
+    if not success then
+        return nil, err or "Download failed"
+    end
+    
+    if result == "" then
+        return nil, "Empty response"
     end
     
     return result
