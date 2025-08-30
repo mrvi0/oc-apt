@@ -754,4 +754,5 @@ local function main(args)
 end
 
 -- Run the program
-main({...}) 
+local args = {...}
+main(args) 

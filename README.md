@@ -59,6 +59,24 @@ lua install-simple.lua
 
 This uses direct component API instead of the internet library.
 
+## 🗑️ Uninstallation
+
+If you need to remove OC-APT from your system:
+
+```bash
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/uninstall.lua
+lua uninstall.lua
+```
+
+The uninstaller will:
+- Remove all OC-APT files (`/usr/bin/oc-apt.lua`, `/usr/bin/apt`)
+- Delete configuration directories (`/etc/oc-apt/`)
+- Remove package cache (`/var/cache/oc-apt/`)
+- Delete installed package database (`/var/lib/oc-apt/`)
+- Clean up any backup files
+
+**Warning:** This will permanently remove all package information and settings. You'll need to reinstall packages after reinstalling OC-APT.
+
 ## 📖 Usage Guide
 
 ### Basic Package Management
@@ -271,9 +289,13 @@ make clean
 oc-apt/
 ├── oc-apt.lua              # Main APT manager script
 ├── install.lua             # Installation script
+├── install-simple.lua     # Alternative installer (fallback)
+├── uninstall.lua           # Uninstallation script
 ├── create-package.lua      # Package creation tool
 ├── validate-package.lua    # Package validation tool
-├── example-packages.json   # Example repository
+├── test-http.lua           # HTTP testing utility
+├── packages.json           # Main package repository
+├── example-packages.json   # Example repository template
 ├── examples/
 │   └── simple-wget/        # Example package
 │       ├── wget.lua
@@ -286,6 +308,7 @@ oc-apt/
 ├── Makefile               # Build automation
 ├── README.md              # This file
 ├── USAGE_EXAMPLES.md      # Detailed usage examples
+├── ARCHITECTURE.md        # Repository architecture guide
 ├── CHANGELOG.md           # Version history
 └── LICENSE                # MIT License
 ```
@@ -328,7 +351,25 @@ The system comes pre-configured with a default repository. You can add additiona
 
 1. Check this README for usage instructions
 2. Use `apt` without arguments to see available commands
-3. Open an issue on GitHub for bugs or feature requests
+3. Try reinstalling: Download and run `uninstall.lua`, then `install.lua`
+4. Open an issue on GitHub for bugs or feature requests
+
+### Complete Reinstallation
+
+If OC-APT is not working correctly, try a complete reinstallation:
+
+```bash
+# 1. Uninstall current version
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/uninstall.lua
+lua uninstall.lua
+
+# 2. Reinstall fresh version
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/install.lua
+lua install.lua
+
+# 3. Update package lists
+apt update
+```
 
 ## 🤝 Contributing
 
