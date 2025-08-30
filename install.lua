@@ -43,6 +43,10 @@ local function print_info(text)
     print_colored(COLORS.CYAN, "INFO: " .. text)
 end
 
+local function print_warning(text)
+    print_colored(COLORS.YELLOW, "WARNING: " .. text)
+end
+
 -- Ensure directory exists
 local function ensure_dir(path)
     local dir = filesystem.path(path)
@@ -130,9 +134,22 @@ local function install_apt()
     
     local ok, err = filesystem.link(INSTALL_CONFIG.install_path, INSTALL_CONFIG.symlink_path)
     if not ok then
-        print_error("Failed to create symlink: " .. tostring(err or "unknown error"))
-        print("You can manually run: ln -s " .. INSTALL_CONFIG.install_path .. " " .. INSTALL_CONFIG.symlink_path)
-        print("Or use: lua " .. INSTALL_CONFIG.install_path .. " <command>")
+        print_warning("Failed to create symlink: " .. tostring(err or "unknown error"))
+        print_info("Creating wrapper script instead...")
+        
+        -- Create a Lua wrapper script
+        local wrapper_file = io.open(INSTALL_CONFIG.symlink_path, "w")
+        if wrapper_file then
+            wrapper_file:write("#!/bin/lua\n")
+            wrapper_file:write("-- OC-APT wrapper script\n")
+            wrapper_file:write("local args = {...}\n")
+            wrapper_file:write("dofile(\"" .. INSTALL_CONFIG.install_path .. "\")\n")
+            wrapper_file:close()
+            print_success("Wrapper script created successfully")
+        else
+            print_error("Failed to create wrapper script")
+            print("You can manually use: lua " .. INSTALL_CONFIG.install_path .. " <command>")
+        end
     else
         print_success("Symlink created successfully")
     end
