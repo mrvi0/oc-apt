@@ -139,7 +139,7 @@ local function install_apt()
         -- Create simple shell script as symlink alternative
         local link_file = io.open(INSTALL_CONFIG.symlink_path, "w")
         if link_file then
-            link_file:write("#!/usr/bin/env lua\n")
+            link_file:write("#!/bin/lua\n")
             link_file:write("-- APT wrapper script\n")
             link_file:write("local args = {...}\n")
             link_file:write("dofile(\"" .. INSTALL_CONFIG.install_path .. "\")\n")

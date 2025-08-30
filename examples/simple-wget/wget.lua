@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/lua
 
 --[[
 Simple wget implementation for OpenComputers
@@ -6,8 +6,13 @@ Downloads files from the internet
 ]]
 
 local component = require("component")
-local internet = require("internet")
 local filesystem = require("filesystem")
+
+-- Try to load internet component safely
+local internet
+local success_inet = pcall(function()
+    internet = require("internet")
+end)
 local shell = require("shell")
 
 -- Check if internet card is available

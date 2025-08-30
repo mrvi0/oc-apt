@@ -203,7 +203,7 @@ local function check_requirements()
     end
     
     -- Check for essential modules
-    local required_modules = {"json", "filesystem", "computer"}
+    local required_modules = {"filesystem", "computer"}
     for _, module in ipairs(required_modules) do
         local ok, _ = pcall(require, module)
         if not ok then

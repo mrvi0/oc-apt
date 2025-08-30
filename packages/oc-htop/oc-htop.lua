@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/lua
 
 --[[
 oc-htop — Advanced system monitor for OpenComputers

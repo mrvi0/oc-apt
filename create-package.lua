@@ -185,7 +185,7 @@ local function read_input(prompt, default)
     else
         io.write(prompt .. ": ")
     end
-    local input = io.read():trim()
+    local input = string_trim(io.read())
     return input ~= "" and input or default
 end
 
@@ -193,7 +193,7 @@ end
 local function read_yes_no(prompt, default)
     local default_str = default and "Y/n" or "y/N"
     io.write(prompt .. " [" .. default_str .. "]: ")
-    local input = io.read():trim():lower()
+    local input = string_trim(io.read()):lower()
     
     if input == "" then
         return default
@@ -207,14 +207,14 @@ local function split(str, delimiter)
     local result = {}
     local pattern = "([^" .. delimiter .. "]+)"
     for match in str:gmatch(pattern) do
-        table.insert(result, match:trim())
+        table.insert(result, string_trim(match))
     end
     return result
 end
 
 -- String trim function
-function string:trim()
-    return self:match("^%s*(.-)%s*$")
+local function string_trim(s)
+    return s:match("^%s*(.-)%s*$")
 end
 
 -- Validate package name
@@ -304,7 +304,7 @@ local function create_package_interactive()
         if file_mapping and file_mapping ~= "" then
             local dest, src = file_mapping:match("^(.+)=(.+)$")
             if dest and src then
-                package.files[dest:trim()] = src:trim()
+                package.files[string_trim(dest)] = string_trim(src)
             else
                 print_error("Invalid format. Use: destination=source")
             end
