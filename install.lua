@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/lua
 
 --[[
 OC-APT Installation Script
@@ -8,7 +8,12 @@ Downloads and installs the APT package manager for OpenComputers
 local component = require("component")
 local computer = require("computer")
 local filesystem = require("filesystem")
-local internet = require("internet")
+
+-- Try to load internet component safely
+local internet
+local success_inet = pcall(function()
+    internet = require("internet")
+end)
 
 -- Configuration
 local INSTALL_CONFIG = {

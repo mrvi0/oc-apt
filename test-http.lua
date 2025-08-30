@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/lua
 
 --[[
 Simple HTTP Test Script for OC-APT
@@ -7,7 +7,12 @@ Tests the HTTP download functionality
 
 local component = require("component")
 local computer = require("computer")
-local internet = require("internet")
+
+-- Try to load internet component safely
+local internet
+local success_inet = pcall(function()
+    internet = require("internet")
+end)
 
 -- Check if internet component is available
 if not component.isAvailable("internet") then

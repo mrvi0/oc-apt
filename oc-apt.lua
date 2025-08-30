@@ -11,10 +11,135 @@ License: MIT
 local computer = require("computer")
 local component = require("component")
 local filesystem = require("filesystem")
-local internet = require("internet")
-local json = require("json")
 local shell = require("shell")
 local term = require("term")
+
+-- Try to load internet component safely
+local internet
+local success_inet = pcall(function()
+    internet = require("internet")
+end)
+
+-- Simple JSON implementation for OpenComputers
+local json = {}
+
+function json.encode(obj)
+    if type(obj) == "table" then
+        local result = {}
+        local is_array = true
+        local count = 0
+        
+        -- Check if it's an array
+        for k, v in pairs(obj) do
+            count = count + 1
+            if type(k) ~= "number" or k ~= count then
+                is_array = false
+                break
+            end
+        end
+        
+        if is_array then
+            table.insert(result, "[")
+            for i, v in ipairs(obj) do
+                if i > 1 then table.insert(result, ",") end
+                table.insert(result, json.encode(v))
+            end
+            table.insert(result, "]")
+        else
+            table.insert(result, "{")
+            local first = true
+            for k, v in pairs(obj) do
+                if not first then table.insert(result, ",") end
+                first = false
+                table.insert(result, '"' .. tostring(k) .. '":' .. json.encode(v))
+            end
+            table.insert(result, "}")
+        end
+        return table.concat(result)
+    elseif type(obj) == "string" then
+        return '"' .. obj:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t') .. '"'
+    elseif type(obj) == "number" then
+        return tostring(obj)
+    elseif type(obj) == "boolean" then
+        return obj and "true" or "false"
+    elseif obj == nil then
+        return "null"
+    else
+        return '"' .. tostring(obj) .. '"'
+    end
+end
+
+function json.decode(str)
+    -- Simple JSON decoder - handles basic cases
+    if not str or str == "" then
+        return nil
+    end
+    
+    str = str:match("^%s*(.-)%s*$") -- trim whitespace
+    
+    if str:sub(1,1) == "{" then
+        -- Object
+        local obj = {}
+        local content = str:sub(2, -2) -- remove braces
+        if content:match("^%s*$") then return obj end
+        
+        -- Split by commas (simple approach)
+        for pair in content:gmatch('[^,]+') do
+            local key, value = pair:match('%s*"([^"]+)"%s*:%s*(.+)%s*')
+            if key and value then
+                if value:sub(1,1) == '"' and value:sub(-1) == '"' then
+                    obj[key] = value:sub(2, -2) -- string value
+                elseif value == "true" then
+                    obj[key] = true
+                elseif value == "false" then
+                    obj[key] = false
+                elseif value == "null" then
+                    obj[key] = nil
+                elseif tonumber(value) then
+                    obj[key] = tonumber(value)
+                else
+                    obj[key] = value
+                end
+            end
+        end
+        return obj
+    elseif str:sub(1,1) == "[" then
+        -- Array
+        local arr = {}
+        local content = str:sub(2, -2) -- remove brackets
+        if content:match("^%s*$") then return arr end
+        
+        for item in content:gmatch('[^,]+') do
+            item = item:match("^%s*(.-)%s*$") -- trim
+            if item:sub(1,1) == '"' and item:sub(-1) == '"' then
+                table.insert(arr, item:sub(2, -2))
+            elseif item == "true" then
+                table.insert(arr, true)
+            elseif item == "false" then
+                table.insert(arr, false)
+            elseif item == "null" then
+                table.insert(arr, nil)
+            elseif tonumber(item) then
+                table.insert(arr, tonumber(item))
+            else
+                table.insert(arr, item)
+            end
+        end
+        return arr
+    elseif str:sub(1,1) == '"' and str:sub(-1) == '"' then
+        return str:sub(2, -2)
+    elseif str == "true" then
+        return true
+    elseif str == "false" then
+        return false
+    elseif str == "null" then
+        return nil
+    elseif tonumber(str) then
+        return tonumber(str)
+    else
+        return str
+    end
+end
 
 -- Configuration
 local APT_CONFIG = {

@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/lua
 
 --[[
 Simple OC-APT Installation Script (Fallback Version)
