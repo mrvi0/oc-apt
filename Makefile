@@ -25,12 +25,14 @@ validate:
 	@luac -p install.lua  
 	@luac -p create-package.lua
 	@luac -p examples/simple-wget/wget.lua
+	@luac -p packages/oc-htop/oc-htop.lua
 	@echo "All files validated successfully!"
 
 # Validate example packages
 examples:
 	@echo "Validating example packages..."
 	@lua validate-package.lua examples/simple-wget/package.json
+	@lua validate-package.lua packages/oc-htop/package.json
 	@echo "Example packages validated successfully!"
 
 # Clean temporary files

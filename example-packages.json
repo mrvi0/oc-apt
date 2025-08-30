@@ -73,6 +73,24 @@
       "/usr/bin/htop.lua": "https://raw.githubusercontent.com/oc-apt/packages/main/system-monitor/htop.lua"
     }
   },
+  "oc-htop": {
+    "name": "oc-htop",
+    "version": "1.0.0",
+    "description": "Advanced system monitor for OpenComputers inspired by htop",
+    "author": "B4DCAT",
+    "license": "MIT",
+    "dependencies": [],
+    "files": {
+      "/usr/bin/oc-htop.lua": "https://raw.githubusercontent.com/mrvi0/oc-apt/main/packages/oc-htop/oc-htop.lua"
+    },
+    "executable": ["/usr/bin/oc-htop.lua"],
+    "keywords": ["system", "monitor", "htop", "processes", "performance", "utility"],
+    "requirements": {
+      "components": ["gpu", "screen"],
+      "minimum_memory": 256,
+      "minimum_storage": 128
+    }
+  },
   "backup-tool": {
     "name": "backup-tool",
     "version": "1.4.0",

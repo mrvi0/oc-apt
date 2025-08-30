@@ -1,0 +1,34 @@
+{
+  "name": "oc-htop",
+  "version": "1.0.0",
+  "description": "Advanced system monitor for OpenComputers inspired by htop",
+  "author": "B4DCAT",
+  "license": "MIT",
+  "dependencies": [],
+  "files": {
+    "/usr/bin/oc-htop.lua": "https://raw.githubusercontent.com/mrvi0/oc-apt/main/packages/oc-htop/oc-htop.lua"
+  },
+  "executable": ["/usr/bin/oc-htop.lua"],
+  "keywords": ["system", "monitor", "htop", "processes", "performance", "utility"],
+  "homepage": "https://github.com/mrvi0/oc-apt",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrvi0/oc-apt"
+  },
+  "bugs": {
+    "url": "https://github.com/mrvi0/oc-apt/issues"
+  },
+  "requirements": {
+    "components": ["gpu", "screen"],
+    "minimum_memory": 256,
+    "minimum_storage": 128
+  },
+  "install_script": null,
+  "remove_script": null,
+  "long_description": "oc-htop is a powerful system monitoring tool for OpenComputers that provides real-time information about system resources and running processes. Features include: memory usage monitoring, energy consumption tracking, disk space visualization, process list with sorting options, interactive controls for navigation, and a beautiful color-coded interface. Perfect for system administrators and users who need to monitor their OpenComputers systems.",
+  "screenshots": [],
+  "changelog": {
+    "1.0.0": "Initial release with full htop-like functionality"
+  },
+  "categories": ["System", "Monitoring", "Utilities"]
+} 

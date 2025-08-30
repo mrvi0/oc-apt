@@ -8,7 +8,7 @@ This document provides detailed examples of how to use the OC-APT package manage
 
 ```bash
 # 1. Download and install OC-APT
-wget https://raw.githubusercontent.com/your-repo/oc-apt/main/install.lua
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/install.lua
 lua install.lua
 
 # 2. Update package lists
@@ -143,7 +143,7 @@ apt list
 
 ```bash
 # Download the package creator
-wget https://raw.githubusercontent.com/your-repo/oc-apt/main/create-package.lua
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/create-package.lua
 
 # Start the interactive package creator
 lua create-package.lua create
@@ -166,7 +166,7 @@ Keywords: calculator, math, utility
 
 ```bash
 # Download the validator
-wget https://raw.githubusercontent.com/your-repo/oc-apt/main/validate-package.lua
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/validate-package.lua
 
 # Validate your package
 lua validate-package.lua package.json

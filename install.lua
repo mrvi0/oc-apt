@@ -11,7 +11,7 @@ local internet = require("internet")
 
 -- Configuration
 local INSTALL_CONFIG = {
-    apt_url = "https://raw.githubusercontent.com/oc-apt/oc-apt/main/oc-apt.lua",
+    apt_url = "https://raw.githubusercontent.com/mrvi0/oc-apt/main/oc-apt.lua",
     install_path = "/usr/bin/oc-apt.lua",
     symlink_path = "/usr/bin/apt"
 }

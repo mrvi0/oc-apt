@@ -30,13 +30,13 @@ A comprehensive package management system for OpenComputers mod, inspired by Deb
 
 ### Method 1: One-line Installation
 ```bash
-wget https://raw.githubusercontent.com/your-repo/oc-apt/main/install.lua && lua install.lua
+wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/install.lua && lua install.lua
 ```
 
 ### Method 2: Manual Installation
 1. Download the installer:
    ```bash
-   wget https://raw.githubusercontent.com/your-repo/oc-apt/main/install.lua
+   wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/install.lua
    ```
 
 2. Run the installer:
@@ -155,6 +155,7 @@ The default repository includes useful packages such as:
 - **json-lib** - JSON encoding/decoding library
 - **package-manager** - GUI package manager
 - **system-monitor** - System resource monitor
+- **oc-htop** - Advanced system monitor inspired by htop
 - **backup-tool** - Backup and restore utility
 - **web-server** - Simple HTTP server
 - **database** - Simple database system
@@ -165,7 +166,7 @@ The default repository includes useful packages such as:
 
 1. **Use the Package Creator Tool:**
    ```bash
-   wget https://raw.githubusercontent.com/your-repo/oc-apt/main/create-package.lua
+   wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/create-package.lua
    lua create-package.lua create
    ```
 
@@ -173,7 +174,7 @@ The default repository includes useful packages such as:
 
 3. **Validate your package:**
    ```bash
-   wget https://raw.githubusercontent.com/your-repo/oc-apt/main/validate-package.lua
+   wget https://raw.githubusercontent.com/mrvi0/oc-apt/main/validate-package.lua
    lua validate-package.lua package.json
    ```
 
@@ -242,7 +243,7 @@ If you want to contribute or modify the project:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/oc-apt.git
+git clone https://github.com/mrvi0/oc-apt.git
 cd oc-apt
 
 # Validate syntax
@@ -268,8 +269,15 @@ oc-apt/
 │   └── simple-wget/        # Example package
 │       ├── wget.lua
 │       └── package.json
+├── packages/               # Official packages
+│   └── oc-htop/           # System monitor package
+│       ├── oc-htop.lua
+│       ├── package.json
+│       └── README.md
 ├── Makefile               # Build automation
 ├── README.md              # This file
+├── USAGE_EXAMPLES.md      # Detailed usage examples
+├── CHANGELOG.md           # Version history
 └── LICENSE                # MIT License
 ```
 
@@ -342,7 +350,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **GitHub Issues:** [Report bugs or request features](https://github.com/your-repo/oc-apt/issues)
+- **GitHub Issues:** [Report bugs or request features](https://github.com/mrvi0/oc-apt/issues)
 - **OpenComputers Forum:** [Community discussions](https://oc.cil.li/)
 - **Discord:** OpenComputers community server
 
