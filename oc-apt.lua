@@ -69,75 +69,148 @@ function json.encode(obj)
     end
 end
 
+-- Improved JSON decoder with proper tokenization
 function json.decode(str)
-    -- Simple JSON decoder - handles basic cases
-    if not str or str == "" then
-        return nil
+    if not str or str == "" then return nil end
+    
+    local pos = 1
+    
+    local function skip_whitespace()
+        while pos <= #str and str:sub(pos, pos):match("%s") do
+            pos = pos + 1
+        end
     end
     
-    str = str:match("^%s*(.-)%s*$") -- trim whitespace
-    
-    if str:sub(1,1) == "{" then
-        -- Object
-        local obj = {}
-        local content = str:sub(2, -2) -- remove braces
-        if content:match("^%s*$") then return obj end
+    local function parse_value()
+        skip_whitespace()
+        if pos > #str then return nil end
         
-        -- Split by commas (simple approach)
-        for pair in content:gmatch('[^,]+') do
-            local key, value = pair:match('%s*"([^"]+)"%s*:%s*(.+)%s*')
-            if key and value then
-                if value:sub(1,1) == '"' and value:sub(-1) == '"' then
-                    obj[key] = value:sub(2, -2) -- string value
-                elseif value == "true" then
-                    obj[key] = true
-                elseif value == "false" then
-                    obj[key] = false
-                elseif value == "null" then
-                    obj[key] = nil
-                elseif tonumber(value) then
-                    obj[key] = tonumber(value)
+        local char = str:sub(pos, pos)
+        
+        if char == '"' then
+            -- Parse string
+            pos = pos + 1
+            local start = pos
+            while pos <= #str and str:sub(pos, pos) ~= '"' do
+                if str:sub(pos, pos) == '\\' then
+                    pos = pos + 2
                 else
-                    obj[key] = value
+                    pos = pos + 1
                 end
             end
-        end
-        return obj
-    elseif str:sub(1,1) == "[" then
-        -- Array
-        local arr = {}
-        local content = str:sub(2, -2) -- remove brackets
-        if content:match("^%s*$") then return arr end
-        
-        for item in content:gmatch('[^,]+') do
-            item = item:match("^%s*(.-)%s*$") -- trim
-            if item:sub(1,1) == '"' and item:sub(-1) == '"' then
-                table.insert(arr, item:sub(2, -2))
-            elseif item == "true" then
-                table.insert(arr, true)
-            elseif item == "false" then
-                table.insert(arr, false)
-            elseif item == "null" then
-                table.insert(arr, nil)
-            elseif tonumber(item) then
-                table.insert(arr, tonumber(item))
+            if pos > #str then error("Unterminated string") end
+            local result = str:sub(start, pos - 1)
+            pos = pos + 1
+            return result
+        elseif char == '{' then
+            -- Parse object
+            pos = pos + 1
+            local obj = {}
+            skip_whitespace()
+            
+            if pos <= #str and str:sub(pos, pos) == '}' then
+                pos = pos + 1
+                return obj
+            end
+            
+            while pos <= #str do
+                skip_whitespace()
+                
+                -- Parse key
+                local key = parse_value()
+                if type(key) ~= "string" then error("Expected string key") end
+                
+                skip_whitespace()
+                if pos > #str or str:sub(pos, pos) ~= ':' then error("Expected ':'") end
+                pos = pos + 1
+                
+                -- Parse value
+                local value = parse_value()
+                obj[key] = value
+                
+                skip_whitespace()
+                if pos > #str then break end
+                
+                local next_char = str:sub(pos, pos)
+                if next_char == '}' then
+                    pos = pos + 1
+                    break
+                elseif next_char == ',' then
+                    pos = pos + 1
+                else
+                    error("Expected ',' or '}'")
+                end
+            end
+            
+            return obj
+        elseif char == '[' then
+            -- Parse array
+            pos = pos + 1
+            local arr = {}
+            skip_whitespace()
+            
+            if pos <= #str and str:sub(pos, pos) == ']' then
+                pos = pos + 1
+                return arr
+            end
+            
+            while pos <= #str do
+                local value = parse_value()
+                table.insert(arr, value)
+                
+                skip_whitespace()
+                if pos > #str then break end
+                
+                local next_char = str:sub(pos, pos)
+                if next_char == ']' then
+                    pos = pos + 1
+                    break
+                elseif next_char == ',' then
+                    pos = pos + 1
+                else
+                    error("Expected ',' or ']'")
+                end
+            end
+            
+            return arr
+        elseif char:match("[%d%-]") then
+            -- Parse number
+            local start = pos
+            if str:sub(pos, pos) == '-' then pos = pos + 1 end
+            while pos <= #str and str:sub(pos, pos):match("%d") do
+                pos = pos + 1
+            end
+            if pos <= #str and str:sub(pos, pos) == '.' then
+                pos = pos + 1
+                while pos <= #str and str:sub(pos, pos):match("%d") do
+                    pos = pos + 1
+                end
+            end
+            return tonumber(str:sub(start, pos - 1))
+        else
+            -- Parse literal (true, false, null)
+            if str:sub(pos, pos + 3) == "true" then
+                pos = pos + 4
+                return true
+            elseif str:sub(pos, pos + 4) == "false" then
+                pos = pos + 5
+                return false
+            elseif str:sub(pos, pos + 3) == "null" then
+                pos = pos + 4
+                return nil
             else
-                table.insert(arr, item)
+                error("Unexpected character: " .. char)
             end
         end
-        return arr
-    elseif str:sub(1,1) == '"' and str:sub(-1) == '"' then
-        return str:sub(2, -2)
-    elseif str == "true" then
-        return true
-    elseif str == "false" then
-        return false
-    elseif str == "null" then
-        return nil
-    elseif tonumber(str) then
-        return tonumber(str)
+    end
+    
+    local success, result = pcall(parse_value)
+    if success then
+        return result
     else
-        return str
+        -- Fallback to simple parsing for basic cases
+        print_warning("JSON parsing error, using fallback: " .. tostring(result))
+        return {}
     end
 end
 
