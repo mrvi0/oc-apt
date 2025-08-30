@@ -6,6 +6,7 @@ Downloads and installs the APT package manager for OpenComputers
 ]]
 
 local component = require("component")
+local computer = require("computer")
 local filesystem = require("filesystem")
 local internet = require("internet")
 
@@ -60,11 +61,21 @@ local function download_file(url, path)
     end
     
     local result = ""
-    local chunk
+    local timeout = computer.uptime() + 30 -- 30 second timeout
+    
     repeat
-        chunk = handle:read(math.huge)
+        local chunk = handle:read(1024)
         if chunk then
             result = result .. chunk
+        else
+            -- Small delay to prevent busy waiting
+            os.sleep(0.05)
+        end
+        
+        -- Check timeout
+        if computer.uptime() > timeout then
+            handle:close()
+            return false, "Request timeout"
         end
     until not chunk
     
