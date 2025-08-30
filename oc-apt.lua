@@ -141,6 +141,25 @@ function json.decode(str)
     end
 end
 
+-- Utility functions
+local function table_size(t)
+    local count = 0
+    for _ in pairs(t) do count = count + 1 end
+    return count
+end
+
+local function table_keys(t)
+    local keys = {}
+    for k in pairs(t) do
+        table.insert(keys, k)
+    end
+    return keys
+end
+
+local function string_trim(s)
+    return s:match("^%s*(.-)%s*$")
+end
+
 -- Configuration
 local APT_CONFIG = {
     version = "1.0.0",
@@ -769,25 +788,6 @@ local function list_repos()
     for i, repo in ipairs(repos) do
         print(i .. ": " .. repo)
     end
-end
-
--- Utility functions
-local function table_size(t)
-    local count = 0
-    for _ in pairs(t) do count = count + 1 end
-    return count
-end
-
-local function table_keys(t)
-    local keys = {}
-    for k in pairs(t) do
-        table.insert(keys, k)
-    end
-    return keys
-end
-
-local function string_trim(s)
-    return s:match("^%s*(.-)%s*$")
 end
 
 -- Main command handler
