@@ -32,27 +32,19 @@ local function http_request(url)
     local timeout = computer.uptime() + 30 -- 30 second timeout
     local bytes_received = 0
     
-    repeat
-        local chunk = handle:read(1024)
-        if chunk then
-            result = result .. chunk
-            bytes_received = bytes_received + #chunk
-            if bytes_received % 4096 == 0 then
-                print("  Downloaded: " .. bytes_received .. " bytes")
-            end
-        else
-            -- Small delay to prevent busy waiting
-            os.sleep(0.05)
+    -- Use the iterator approach as documented
+    for chunk in handle do
+        result = result .. chunk
+        bytes_received = bytes_received + #chunk
+        if bytes_received % 4096 == 0 then
+            print("  Downloaded: " .. bytes_received .. " bytes")
         end
         
         -- Check timeout
         if computer.uptime() > timeout then
-            handle:close()
             return nil, "Request timeout"
         end
-    until not chunk
-    
-    handle:close()
+    end
     print("  Total downloaded: " .. bytes_received .. " bytes")
     return result
 end

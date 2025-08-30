@@ -24,7 +24,7 @@ local APT_CONFIG = {
     db_file = "/var/lib/oc-apt/installed.json",
     repos_file = "/etc/oc-apt/sources.list",
     default_repos = {
-        "https://raw.githubusercontent.com/mrvi0/oc-apt/main/example-packages.json"
+        "https://raw.githubusercontent.com/mrvi0/oc-apt/main/packages.json"
     }
 }
 
@@ -101,23 +101,16 @@ local function http_request(url)
     local result = ""
     local timeout = computer.uptime() + 30 -- 30 second timeout
     
-    repeat
-        local chunk = handle:read(1024)
-        if chunk then
-            result = result .. chunk
-        else
-            -- Small delay to prevent busy waiting
-            os.sleep(0.05)
-        end
+    -- Use the iterator approach as documented
+    for chunk in handle do
+        result = result .. chunk
         
         -- Check timeout
         if computer.uptime() > timeout then
-            handle:close()
             return nil, "Request timeout"
         end
-    until not chunk
+    end
     
-    handle:close()
     return result
 end
 

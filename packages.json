@@ -1,0 +1,37 @@
+{
+  "oc-htop": {
+    "name": "oc-htop",
+    "version": "1.0.0",
+    "description": "Advanced system monitor for OpenComputers inspired by htop",
+    "author": "B4DCAT",
+    "license": "MIT",
+    "dependencies": [],
+    "files": {
+      "/usr/bin/oc-htop.lua": "https://raw.githubusercontent.com/mrvi0/oc-apt/main/packages/oc-htop/oc-htop.lua"
+    },
+    "executable": ["/usr/bin/oc-htop.lua"],
+    "keywords": ["system", "monitor", "htop", "processes", "performance", "utility"],
+    "requirements": {
+      "components": ["gpu", "screen"],
+      "minimum_memory": 256,
+      "minimum_storage": 128
+    }
+  },
+  "wget": {
+    "name": "wget",
+    "version": "1.0.0",
+    "description": "Download files from the internet",
+    "author": "oc-apt",
+    "dependencies": [],
+    "files": {
+      "/usr/bin/wget.lua": "https://raw.githubusercontent.com/mrvi0/oc-apt/main/examples/simple-wget/wget.lua"
+    },
+    "executable": ["/usr/bin/wget.lua"],
+    "keywords": ["download", "internet", "http", "utility"],
+    "requirements": {
+      "components": ["internet"],
+      "minimum_memory": 192,
+      "minimum_storage": 64
+    }
+  }
+} 
