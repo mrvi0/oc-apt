@@ -1,0 +1,26 @@
+{
+  "name": "wget",
+  "version": "1.0.0",
+  "description": "Download files from the internet",
+  "author": "oc-apt",
+  "license": "MIT",
+  "dependencies": [],
+  "files": {
+    "/usr/bin/wget.lua": "./wget.lua"
+  },
+  "executable": ["/usr/bin/wget.lua"],
+  "keywords": ["download", "internet", "http", "utility"],
+  "homepage": "https://github.com/oc-apt/oc-apt",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oc-apt/oc-apt"
+  },
+  "bugs": {
+    "url": "https://github.com/oc-apt/oc-apt/issues"
+  },
+  "requirements": {
+    "components": ["internet"],
+    "minimum_memory": 192,
+    "minimum_storage": 64
+  }
+} 
